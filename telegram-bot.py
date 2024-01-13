@@ -29,6 +29,7 @@ DOC_URL = "https://github.com/justmert/sia-telegram-alert-bot/blob/master/README
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 FIREBASE_ADMIN_SDK_PATH = os.getenv("FIREBASE_ADMIN_SDK_PATH")
 SERVER_URL = os.getenv("SERVER_URL")
+ALERT_FILTER = tuple( [ str(i) for i in os.getenv("SIA_ALERT_FILTER").split(",") ] )
 
 # Initialize Firebase
 cred = credentials.Certificate(FIREBASE_ADMIN_SDK_PATH)
@@ -295,10 +296,13 @@ async def alerts(unique_id: str, app_type: str, request_body: dict = None):
                 payload = request_body.get("data", None)
 
             if payload:
-                formatted_alert, parse_mode = format_alert(payload, app_type)
-                await application.bot.send_message(
-                    chat_id=chat_id, text=formatted_alert, parse_mode=parse_mode
-                )
+                if alert_message.get("severity") in ALERT_FILTER:
+                    formatted_alert, parse_mode = format_alert(payload, app_type)
+                    await application.bot.send_message(
+                        chat_id=chat_id, text=formatted_alert, parse_mode=parse_mode
+                    )
+                else:
+                    reponse_message = "Alert does not match filter"
 
             else:
                 formatted_alert, parse_mode = format_alert(request_body, app_type)
