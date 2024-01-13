@@ -209,7 +209,7 @@ def format_alert(alert_message, app_type):
 
         message = f"{severity_icon} {severity_message} alert for *{app_type}*\n"
         formatted_timestamp = parse_timestamp(alert_message["timestamp"]).strftime(
-            "%Y\-%m\-%d %H:%M:%S"
+            "%Y\\-%m\\-%d %H:%M:%S"
         )
         message += f"*Timestamp*: {formatted_timestamp}\n"
         message += f"*Message*: {alert_message['message']}\n"
