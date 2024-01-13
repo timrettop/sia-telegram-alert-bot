@@ -287,31 +287,31 @@ async def alerts(unique_id: str, app_type: str, request_body: dict = None):
 
     try:
         if request_body is not None:
-            # Format the message with the default formatter
-            payload = None
-            if app_type.lower() == "renterd":
-                payload = request_body.get("payload", None)
+            if request_body.get("severity") in ALERT_FILTER:
+                # Format the message with the default formatter
+                payload = None
+                if app_type.lower() == "renterd":
+                    payload = request_body.get("payload", None)
 
-            elif app_type.lower() == "hostd":
-                payload = request_body.get("data", None)
+                elif app_type.lower() == "hostd":
+                    payload = request_body.get("data", None)
 
-            if payload:
-                if alert_message.get("severity") in ALERT_FILTER:
-                    formatted_alert, parse_mode = format_alert(payload, app_type)
-                    await application.bot.send_message(
-                        chat_id=chat_id, text=formatted_alert, parse_mode=parse_mode
-                    )
+                if payload:
+                        formatted_alert, parse_mode = format_alert(payload, app_type)
+                        await application.bot.send_message(
+                            chat_id=chat_id, text=formatted_alert, parse_mode=parse_mode
+                        )
+
                 else:
-                    reponse_message = "Alert does not match filter"
+                    formatted_alert, parse_mode = format_alert(request_body, app_type)
 
+                # Send the message
+                await application.bot.send_message(
+                    chat_id=chat_id, text=formatted_alert, parse_mode=parse_mode
+                )
+                response_message = "Alert sent successfully"
             else:
-                formatted_alert, parse_mode = format_alert(request_body, app_type)
-
-            # Send the message
-            await application.bot.send_message(
-                chat_id=chat_id, text=formatted_alert, parse_mode=parse_mode
-            )
-            response_message = "Alert sent successfully"
+                response_message = "Alert does not match filter"
         else:
             response_message = "No data to send"
     except Exception as e:
